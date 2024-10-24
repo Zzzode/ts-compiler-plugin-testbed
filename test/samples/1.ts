@@ -1,0 +1,1 @@
+type AAAAA = (number, string);
