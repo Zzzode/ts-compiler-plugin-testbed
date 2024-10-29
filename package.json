@@ -1,6 +1,6 @@
 {
   "name": "ts-compiler-plugin",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Custom TypeScript compiler plugin",
   "type": "module",
   "main": "dist/index.js",
