@@ -9,17 +9,27 @@ class CustomCompilerHost implements ts.CompilerHost {
     this.customScanner = this.createCustomScanner();
   }
 
+  // 创建 Scanner 并覆盖 scan 方法
   private createCustomScanner(): ts.Scanner {
-    const scanner = ts.createScanner(ts.ScriptTarget.Latest, /*skipTrivia*/ false);
-
+    const scanner = ts.createScanner(
+      ts.ScriptTarget.Latest,
+      /*skipTrivia*/ false
+    );
     const originalScan = scanner.scan;
 
+    // 覆盖 Scanner 的 scan 方法，添加日志和自定义逻辑
     scanner.scan = function (...args: any): ts.SyntaxKind {
       const token = originalScan.apply(this, args);
+      // console.log(`Scanned token: ${ts.SyntaxKind[token]}, text: '${scanner.getTokenText()}'`);
 
-      console.log(`Scanned token: ${ts.SyntaxKind[token]}, text: ${scanner.getTokenText()}`);
-
-      // 这里可以添加自定义逻辑来修改标记
+      // 自定义标记处理逻辑
+      if (
+        token === ts.SyntaxKind.Identifier &&
+        scanner.getTokenText() === 'AAAAA'
+      ) {
+        debugger;
+        console.log(`Found identifier: '${scanner.getTokenText()}'`);
+      }
 
       return token;
     };
@@ -27,6 +37,7 @@ class CustomCompilerHost implements ts.CompilerHost {
     return scanner;
   }
 
+  // 确保在创建 SourceFile 时调用 Scanner
   createSourceFile(
     fileName: string,
     sourceText: string,
@@ -36,13 +47,18 @@ class CustomCompilerHost implements ts.CompilerHost {
   ): ts.SourceFile {
     console.log(`Creating SourceFile for: ${fileName}`);
 
+    // 使用 Scanner 处理源代码文本
     this.customScanner.setText(sourceText);
     let modifiedSourceText = '';
     let token: ts.SyntaxKind;
-    while ((token = this.customScanner.scan()) !== ts.SyntaxKind.EndOfFileToken) {
+
+    while (
+      (token = this.customScanner.scan()) !== ts.SyntaxKind.EndOfFileToken
+    ) {
       modifiedSourceText += this.customScanner.getTokenText();
     }
 
+    // 使用修改后的源代码文本创建 SourceFile
     const sourceFile = ts.createSourceFile(
       fileName,
       modifiedSourceText,
@@ -51,30 +67,56 @@ class CustomCompilerHost implements ts.CompilerHost {
       scriptKind
     );
 
+    // 进一步处理 AST
     this.hookAST(sourceFile);
-
     return sourceFile;
   }
 
+  // 覆盖 getSourceFile 以确保 Scanner 处理所有 ts 文件
   getSourceFile(
     fileName: string,
     languageVersion: ts.ScriptTarget,
     onError?: (message: string) => void,
     shouldCreateNewSourceFile?: boolean
   ): ts.SourceFile | undefined {
-    const sourceFile = this.delegate.getSourceFile(
+    console.log(`getSourceFile called for: ${fileName}`);
+
+    // 检查是否已经从 delegate 获取到 sourceFile
+    let sourceFile = this.delegate.getSourceFile(
       fileName,
       languageVersion,
       onError,
       shouldCreateNewSourceFile
     );
 
-    if (sourceFile) {
-      this.hookAST(sourceFile);
+    // 如果获取到的是 .ts 文件，需要进行自定义处理
+    if (fileName.endsWith('.ts')) {
+      const fileContent = this.readFile(fileName);
+      if (fileContent) {
+        // 通过自定义的 createSourceFile 来处理源文件，确保 scanner 被调用
+        sourceFile = this.createSourceFile(
+          fileName,
+          fileContent,
+          languageVersion
+        );
+      }
     }
 
     return sourceFile;
   }
+
+  // 自定义的读文件操作
+  readFile(fileName: string): string | undefined {
+    const content = this.delegate.readFile(fileName);
+    if (content) {
+      console.log(`Reading file: ${fileName}`);
+      return content;
+    }
+    console.error(`File not found or empty: ${fileName}`);
+    return undefined;
+  }
+
+  // 以下部分保持不变
 
   getDefaultLibFileName(options: ts.CompilerOptions): string {
     return this.delegate.getDefaultLibFileName(options);
@@ -88,9 +130,15 @@ class CustomCompilerHost implements ts.CompilerHost {
     sourceFiles?: readonly ts.SourceFile[]
   ): void {
     if (sourceFiles) {
-      sourceFiles.forEach(sourceFile => this.hookAST(sourceFile));
+      sourceFiles.forEach((sourceFile) => this.hookAST(sourceFile));
     }
-    this.delegate.writeFile(fileName, content, writeByteOrderMark, onError, sourceFiles);
+    this.delegate.writeFile(
+      fileName,
+      content,
+      writeByteOrderMark,
+      onError,
+      sourceFiles
+    );
   }
 
   getCurrentDirectory(): string {
@@ -105,16 +153,6 @@ class CustomCompilerHost implements ts.CompilerHost {
     return this.delegate.fileExists(fileName);
   }
 
-  readFile(fileName: string): string | undefined {
-    const fileContent = this.delegate.readFile(fileName);
-    if (fileContent) {
-      console.log(`Reading file: ${fileName}`);
-      const sourceFile = this.createSourceFile(fileName, fileContent, ts.ScriptTarget.Latest);
-      return sourceFile.getFullText();
-    }
-    return fileContent;
-  }
-
   getCanonicalFileName(fileName: string): string {
     return this.delegate.getCanonicalFileName(fileName);
   }
@@ -127,20 +165,17 @@ class CustomCompilerHost implements ts.CompilerHost {
     return this.delegate.getNewLine();
   }
 
+  // Hook AST，进行自定义处理
   private hookAST(sourceFile: ts.SourceFile): void {
     const visit = (node: ts.Node) => {
-      // console.log(`Visiting node: ${ts.SyntaxKind[node.kind]}`);
-
-      // 这里可以添加更多的处理逻辑
-      // 例如，修改节点、收集信息等
-
+      // 这里可以添加 AST 处理逻辑
       ts.forEachChild(node, visit);
     };
-
     visit(sourceFile);
   }
 }
 
+// 使用示例
 function compile(fileNames: string[], options: ts.CompilerOptions): void {
   const host = ts.createCompilerHost(options);
   const customHost = new CustomCompilerHost(host);
@@ -148,15 +183,26 @@ function compile(fileNames: string[], options: ts.CompilerOptions): void {
 
   const emitResult = program.emit();
 
-  const diagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+  const diagnostics = ts
+    .getPreEmitDiagnostics(program)
+    .concat(emitResult.diagnostics);
 
-  diagnostics.forEach(diagnostic => {
+  diagnostics.forEach((diagnostic) => {
     if (diagnostic.file) {
-      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
+      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(
+        diagnostic.start!
+      );
+      const message = ts.flattenDiagnosticMessageText(
+        diagnostic.messageText,
+        '\n'
+      );
+      console.log(
+        `${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`
+      );
     } else {
-      console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+      console.log(
+        ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
+      );
     }
   });
 
@@ -165,11 +211,11 @@ function compile(fileNames: string[], options: ts.CompilerOptions): void {
   process.exit(exitCode);
 }
 
-// 使用示例
+// 编译 TypeScript 文件
 const fileNames = ['test/samples/1.ts'];
 const options: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES2015,
-  module: ts.ModuleKind.CommonJS
+  module: ts.ModuleKind.CommonJS,
 };
 
 compile(fileNames, options);
