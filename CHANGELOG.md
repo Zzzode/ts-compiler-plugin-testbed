@@ -1,3 +1,11 @@
+# [0.4.0-alpha.1](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.3.0...v0.4.0-alpha.1) (2024-10-30)
+
+
+### Features
+
+* add main in release ([bbaceae](https://github.com/Zzzode/ts-compiler-plugin-testbed/commit/bbaceae47ba240022251adf09225b843fc257a52))
+* add package-lock ([128ccd8](https://github.com/Zzzode/ts-compiler-plugin-testbed/commit/128ccd8d721874d54570f722faf3c5c3252d2c6e))
+
 # [0.3.0](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.2.0...v0.3.0) (2024-10-30)
 
 
