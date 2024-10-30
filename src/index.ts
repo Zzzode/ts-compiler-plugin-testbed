@@ -5,7 +5,7 @@ class CustomCompilerHost implements ts.CompilerHost {
   private customScanner: ts.Scanner;
 
   constructor(delegate: ts.CompilerHost) {
-    this.delegate = delegate;
+    this.delegate = delegate
     this.customScanner = this.createCustomScanner();
   }
 
