@@ -1,3 +1,10 @@
+# [0.2.0-alpha.1](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.1.0...v0.2.0-alpha.1) (2024-10-30)
+
+
+### Features
+
+* refactor commit message ([f1011a6](https://github.com/Zzzode/ts-compiler-plugin-testbed/commit/f1011a66ef83f8e89050509838a3a5d2dfcd23d5))
+
 # [0.1.0](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.0.2...v0.1.0) (2024-10-30)
 
 
