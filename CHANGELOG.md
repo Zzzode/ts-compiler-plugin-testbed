@@ -1,3 +1,10 @@
+# [0.5.0-alpha.1](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.4.0...v0.5.0-alpha.1) (2024-10-30)
+
+
+### Features
+
+* skip unstable ([2ec310a](https://github.com/Zzzode/ts-compiler-plugin-testbed/commit/2ec310a053573a6cb214258619975712f9d07022))
+
 # [0.4.0](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.3.0...v0.4.0) (2024-10-30)
 
 
