@@ -1,3 +1,10 @@
+# [0.3.0-alpha.1](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.2.0...v0.3.0-alpha.1) (2024-10-30)
+
+
+### Features
+
+* add npm publish ([d1b68ee](https://github.com/Zzzode/ts-compiler-plugin-testbed/commit/d1b68ee54929756c2b0384d2ab8ab7e28b9d767b))
+
 # [0.2.0](https://github.com/Zzzode/ts-compiler-plugin-testbed/compare/v0.1.0...v0.2.0) (2024-10-30)
 
 
