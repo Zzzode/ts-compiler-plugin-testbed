@@ -1,6 +1,11 @@
 {
   "branches": [
-    "release/+([0-9])?(.{+([0-9]),x}).x",
+    "main",
+    {
+      "name": "release/+([0-9])?(.{+([0-9]),x}).x",
+      "channel": "${name.replace(/^release\\//g, '')}",
+      "range": "${name.replace(/^release\\//g, '')}"
+    },
     {
       "name": "alpha",
       "prerelease": "alpha"
