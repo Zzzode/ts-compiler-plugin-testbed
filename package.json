@@ -1,6 +1,11 @@
 {
-  "name": "ts-compiler-plugin",
+  "name": "@zzzode/ts-compiler-plugin",
   "version": "0.0.1",
+  "private": true,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted"
+  },
   "description": "Custom TypeScript compiler plugin",
   "type": "module",
   "main": "dist/index.js",
@@ -17,7 +22,7 @@
     "compiler",
     "plugin"
   ],
-  "author": "Your Name",
+  "author": "zzzode",
   "license": "MIT",
   "devDependencies": {
     "@babel/preset-env": "^7.25.8",
