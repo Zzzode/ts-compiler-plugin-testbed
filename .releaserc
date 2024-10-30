@@ -1,6 +1,6 @@
 {
   "branches": [
-    "main",
+    "release",
     {
       "name": "alpha",
       "prerelease": true
@@ -24,5 +24,6 @@
         ]
       }
     ]
-  ]
+  ],
+  "ci": false
 }
